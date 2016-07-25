@@ -1,16 +1,24 @@
 package com.twobitdata.sdsuwebportal;
 
-/**
- * Created by Jacob on 6/26/2016.
- */
-public class Message {
+public class Message{
 
-    public String subject;
-    public String from;
-
-    public Message(String subject, String from){
-        this.subject = subject;
-        this.from = from;
-    }
-
+	public String subject;
+	public String from;
+	public String link;
+	
+	public Message(String subject, String from){
+		this.from = from;
+		this.subject = subject;
+	}
+	
+	public Message(String subject, String from, String link){
+		this.from = from;
+		this.subject = subject;
+		this.link = link;
+	}
+	
+	public String getMessage(){
+		return "Uh oh, this is currently not supported!";
+	}
+	
 }

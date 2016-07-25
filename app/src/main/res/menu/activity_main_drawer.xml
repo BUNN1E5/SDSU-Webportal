@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/admissions"
+            android:icon="@drawable/admissions_icon"
+            android:title="Admissions" />
+        <item
+            android:id="@+id/registration"
+            android:icon="@drawable/registration"
+            android:title="Registration" />
+        <item
+            android:id="@+id/Classes"
+            android:icon="@drawable/classes"
+            android:title="Classes"
+            />
+        <item
+            android:id="@+id/messages"
+            android:icon="@drawable/messages"
+            android:title="Messages" />
+        <item
+            android:id="@+id/campus_map"
+            android:icon="@drawable/map_icon"
+            android:title="Campus Map"
+            />
+    </group>
+
+    <item android:title="User Management">
+        <menu>
+            <item
+                android:id="@+id/logout"
+                android:icon="@drawable/logout"
+                android:title="Logout" />
+        </menu>
+    </item>
+
+</menu>

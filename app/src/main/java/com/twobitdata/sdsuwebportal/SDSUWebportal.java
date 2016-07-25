@@ -16,9 +16,9 @@ import java.util.zip.GZIPInputStream;
 import java.net.URL;
 
 public class SDSUWebportal {
-
+	
 	public static SDSUWebportal instance = new SDSUWebportal();
-
+	
 	public String sessionID;
 	private CookieManager cookieManager;
 	
@@ -26,8 +26,9 @@ public class SDSUWebportal {
 		cookieManager = new CookieManager();
 		CookieHandler.setDefault(cookieManager);
 	}
-
-	public String login(String username, String password) throws Exception {
+	
+	
+	public Boolean login(String username, String password) throws Exception {
 		String url = "https://sunspot.sdsu.edu/AuthenticationService/loginVerifier.html" + "?pc=portal";
 		URL obj = new URL(url);
 		HttpURLConnection con = (HttpURLConnection) obj.openConnection();
@@ -77,12 +78,17 @@ public class SDSUWebportal {
 		}
 
 		in.close();
-		//System.out.println(response.toString());
+
+
+		if(response.toString().contains("<meta content=\"The San Diego State University Authentication Service is a single sign-on protocol for online services. Its purpose is to permit an SDSU user to access multiple SDSU applications while providing credentials only once.\" name=\"DESCRIPTION\" />")){
+			System.out.println(response.toString());
+			throw new Exception();
+		}
 		
 		sessionID = con.getURL().toString().substring(con.getURL().toString().indexOf("sess_id=") + 8, con.getURL().toString().length());
 		
 		//System.out.println("sessionID URL: " + sessionID);
-		return response.toString();
+		return true;
 	}
 
 	public String admission(String sessionId) throws Exception {
@@ -205,6 +211,85 @@ public class SDSUWebportal {
 		}
 		in.close();
 		//System.out.println(response.toString());
+		return response.toString();
+	}
+
+	public String logout (String sessionID) throws Exception
+	{
+		String userID = sessionID.substring(sessionID.indexOf("|")+1);
+		String url = "https://sunspot.sdsu.edu/pls/webapp/user_session.p_invalidate" + "?p_message=&p_ref=N&p_session_id=" + sessionID + "&p_user_id=" + userID + "";
+		URL obj = new URL(url);
+		HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+
+		con.setRequestMethod("GET");
+
+		con.setRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
+		con.setRequestProperty("Upgrade-Insecure-Requests", "1");
+		con.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36");
+		con.setRequestProperty("Referer", "https://sunspot.sdsu.edu/pls/webapp/web_menu.main_page?sess_id=845058276|10312546");
+		con.setRequestProperty("Connection", "keep-alive");
+		con.setRequestProperty("Host", "sunspot.sdsu.edu");
+		con.setRequestProperty("DNT", "1");
+		con.setRequestProperty("Accept-Encoding", "gzip, deflate, sdch, br");
+		con.setRequestProperty("Accept-Language", "en-US,en;q=0.8");
+
+
+		int responseCode = con.getResponseCode();
+		System.out.println("Sending 'GET' request to URL : " + url);
+		System.out.println("Response Code : " + responseCode);
+
+		InputStream input = con.getInputStream()
+				;if ("gzip".equals(con.getContentEncoding())) {
+		input = new GZIPInputStream(input);
+	}
+
+		BufferedReader in = new BufferedReader(new InputStreamReader(input));
+		String inputLine;
+		StringBuffer response = new StringBuffer();
+
+		while ((inputLine = in.readLine()) != null) {	response.append(inputLine);
+		}
+
+		in.close();
+		System.out.println(response.toString());
+		return response.toString();
+	}
+
+	public String getCalendar (String sessionID) throws Exception
+	{
+		String url = "https://sunspot.sdsu.edu/schedule/mycalendar?sess_id=" + sessionID + "&category=my_calendar";
+		URL obj = new URL(url);
+		HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+
+		con.setRequestMethod("GET");
+
+		con.setRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
+		con.setRequestProperty("Upgrade-Insecure-Requests", "1");
+		con.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36");
+		con.setRequestProperty("Referer", "https://sunspot.sdsu.edu/schedule/myregistrationinfo");
+		con.setRequestProperty("Connection", "keep-alive");
+		con.setRequestProperty("Host", "sunspot.sdsu.edu");
+		con.setRequestProperty("DNT", "1");
+		con.setRequestProperty("Accept-Encoding", "gzip, deflate, sdch, br");
+		con.setRequestProperty("Accept-Language", "en-US,en;q=0.8");
+
+
+		int responseCode = con.getResponseCode();
+
+		InputStream input = con.getInputStream();
+		if ("gzip".equals(con.getContentEncoding())) {
+			input = new GZIPInputStream(input);
+		}
+
+		BufferedReader in = new BufferedReader(new InputStreamReader(input));
+		String inputLine;
+		StringBuffer response = new StringBuffer();
+
+		while ((inputLine = in.readLine()) != null) {	response.append(inputLine);
+		}
+
+		in.close();
+		System.out.println(response.toString());
 		return response.toString();
 	}
 }
