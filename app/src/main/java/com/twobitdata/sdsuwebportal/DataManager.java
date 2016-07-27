@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -107,8 +108,25 @@ public class DataManager extends AsyncTask<Void, Void, Boolean>{
 		for (int i = 0; i < admissionData.length; i++) {
 			if(!admissionData[i].trim().isEmpty() ){
 				cleaned.add(admissionData[i]);
+				System.out.println(admissionData[i]);
 			}
 		}
+
+		// -_- Hard coding
+		cleaned.remove("Institution");
+		cleaned.remove("Dates");
+		cleaned.remove("Degree");
+		cleaned.remove("HIGH SCHOOL");
+		cleaned.remove("Type");
+		cleaned.remove("Total");
+		cleaned.remove("Date");
+		cleaned.remove("Status");
+		cleaned.remove("Status Details");
+		cleaned.remove("Status");
+		cleaned.remove("Status Details");
+		cleaned.remove("Status");
+		cleaned.remove("Status Details");
+		cleaned.remove("Test Scores:");
 
 		for (int i = 1; i < cleaned.size() - 1 ; i+=2) {
 			AdmisionStatus.put(cleaned.get(i), cleaned.get(i+1));

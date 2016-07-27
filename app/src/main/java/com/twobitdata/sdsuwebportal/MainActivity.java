@@ -74,17 +74,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         webView = (WebView)findViewById(R.id.campus_map);
         webView.getSettings().setJavaScriptEnabled(true);
-        webView.getSettings().setLoadWithOverviewMode(true);
-        webView.getSettings().setUseWideViewPort(true);
+        //webView.getSettings().setLoadWithOverviewMode(true);
+        //webView.getSettings().setUseWideViewPort(true);
         webView.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
         webView.setScrollbarFadingEnabled(true);
 
         webView.getSettings().setSupportZoom(true);
         webView.getSettings().setBuiltInZoomControls(true);
-        //webView.getSettings().setDomStorageEnabled(true);
         webView.setHorizontalScrollBarEnabled(false);
-        webView.setInitialScale(150);
-        //webView.setWebViewClient(new WebViewClient());
         webView.setVisibility(View.INVISIBLE);
     }
 
@@ -150,12 +147,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             setTitle("Messages");
         } else if(id == R.id.Classes){
             webView.setVisibility(View.VISIBLE);
-
+            webView.setInitialScale(150);
             webView.loadDataWithBaseURL("file:///android_asset/", DataManager.classes, "text/html", "UTF-8", null);
             setTitle("Classes");
         }else if(id == R.id.campus_map){
             webView.setVisibility(View.VISIBLE);
-            webView.loadUrl("file:///android_asset/campus_map/sdsu_map.html");
+            webView.setInitialScale(100);
+            webView.loadUrl("file:///android_asset/sdsu_map.png");
             setTitle("Campus Map");
         }
         else if(id == R.id.logout){
