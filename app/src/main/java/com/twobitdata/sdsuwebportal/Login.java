@@ -37,6 +37,7 @@ public class Login extends Activity{
             public void onClick(View v) {
                 if(DataManager.login(username.getText().toString(), password.getText().toString())){
                     DataManager.retrieveData();
+                    DataManager.cacheClasses(Login.this);
                     startActivity(login);
                 } else{
                     loginFailed.setText("Incorrect Username or Password");

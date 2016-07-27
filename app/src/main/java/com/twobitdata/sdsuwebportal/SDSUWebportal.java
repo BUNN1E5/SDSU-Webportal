@@ -289,7 +289,7 @@ public class SDSUWebportal {
 		}
 
 		in.close();
-		System.out.println(response.toString());
+		//System.out.println(response.toString());
 		return response.toString();
 	}
 }

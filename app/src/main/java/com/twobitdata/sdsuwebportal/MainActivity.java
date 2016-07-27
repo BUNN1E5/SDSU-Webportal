@@ -4,12 +4,8 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.provider.Settings;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -19,12 +15,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.ArrayAdapter;
-import android.widget.ListAdapter;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.google.android.gms.appindexing.Action;
@@ -34,10 +26,12 @@ import com.google.android.gms.common.api.GoogleApiClient;
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private RecyclerView itemView;
+    private ItemAdapter adapter;
     TextView name;
     TextView studentId;
 
-    WebView campusMap;
+    WebView webView;
+    String PACKAGE_NAME;
 
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
@@ -51,10 +45,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
+        PACKAGE_NAME = getApplicationContext().getPackageName();
         //Custom Code Start
 
-
+        //DataManager.cacheClasses(this);
 
         setTitle("Admissions");
 
@@ -71,9 +65,27 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
 
-        campusMap = (WebView)findViewById(R.id.campus_map);
-        campusMap.getSettings().setJavaScriptEnabled(true);
-        //campusMap.setWebViewClient(new WebViewClient());
+
+        itemView = (RecyclerView)findViewById(R.id.item_view);
+        adapter = new ItemAdapter(this, DataManager.admissions);
+        itemView.setAdapter(adapter);
+        itemView.setLayoutManager(new LinearLayoutManager(this));
+
+
+        webView = (WebView)findViewById(R.id.campus_map);
+        webView.getSettings().setJavaScriptEnabled(true);
+        webView.getSettings().setLoadWithOverviewMode(true);
+        webView.getSettings().setUseWideViewPort(true);
+        webView.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
+        webView.setScrollbarFadingEnabled(true);
+
+        webView.getSettings().setSupportZoom(true);
+        webView.getSettings().setBuiltInZoomControls(true);
+        //webView.getSettings().setDomStorageEnabled(true);
+        webView.setHorizontalScrollBarEnabled(false);
+        webView.setInitialScale(150);
+        //webView.setWebViewClient(new WebViewClient());
+        webView.setVisibility(View.INVISIBLE);
     }
 
     @Override
@@ -122,20 +134,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int id = item.getItemId();
 
         if (id == R.id.admissions) {
-
+            webView.setVisibility(View.INVISIBLE);
+            adapter.setData(DataManager.admissions);
+            adapter.notifyDataSetChanged();
             setTitle("Admissions");
         } else if (id == R.id.registration) {
-
+            webView.setVisibility(View.INVISIBLE);
+            adapter.setData(DataManager.registrations);
+            adapter.notifyDataSetChanged();
             setTitle("Registration");
         } else if (id == R.id.messages) {
-
+            webView.setVisibility(View.INVISIBLE);
+            adapter.setData(DataManager.messages);
+            adapter.notifyDataSetChanged();
             setTitle("Messages");
         } else if(id == R.id.Classes){
+            webView.setVisibility(View.VISIBLE);
 
+            webView.loadDataWithBaseURL("file:///android_asset/", DataManager.classes, "text/html", "UTF-8", null);
             setTitle("Classes");
         }else if(id == R.id.campus_map){
-
-            campusMap.loadUrl("https://docs.google.com/gview?embedded=true&url=https://sunspot.sdsu.edu/map/sdsu_map.pdf");
+            webView.setVisibility(View.VISIBLE);
+            webView.loadUrl("file:///android_asset/campus_map/sdsu_map.html");
             setTitle("Campus Map");
         }
         else if(id == R.id.logout){

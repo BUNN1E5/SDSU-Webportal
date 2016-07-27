@@ -1,9 +1,12 @@
 package com.twobitdata.sdsuwebportal;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -22,7 +25,10 @@ public class DataManager extends AsyncTask<Void, Void, Boolean>{
 	Intent logedIn;
 
 	// Message Center
-	static List<Message> messages;
+	static List<ListItem> messages;
+	static List<ListItem> admissions; //With S for consistency
+	static List<ListItem> registrations;
+
 
 	public static boolean login(String username, String password) {
 		try {
@@ -58,6 +64,24 @@ public class DataManager extends AsyncTask<Void, Void, Boolean>{
 		} catch(Exception e) {
 			return false;
 		}
+	}
+
+	//AAAHHHHH THE WORKAROUNDS
+	static Context context;
+	static String classes;
+	public static void cacheClasses(Context context){
+		context = DataManager.context;
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					DataManager.classes = WebportalParser.calendarCleaner(SDSUWebportal.instance.getCalendar(SDSUWebportal.instance.sessionID));
+					//FileOutputStream stream = DataManager.context.openFileOutput("Classes.html", Context.MODE_PRIVATE);
+					//stream.write(DataManager.classes.getBytes());
+					//stream.close();
+				}catch(Exception e){System.err.println(e.toString());}
+			}
+		}).start();
 
 	}
 
@@ -69,12 +93,14 @@ public class DataManager extends AsyncTask<Void, Void, Boolean>{
 	@Override
 	protected Boolean doInBackground(Void... params) {
 		messages = new ArrayList<>();
+		admissions = new ArrayList<>();
+		registrations = new ArrayList<>();
+
 
 		//Convert to lower API level
 		try { admissionData = WebportalParser.admissionParser(SDSUWebportal.instance.admission(SDSUWebportal.instance.sessionID)); System.out.println("2 is done");} catch (Exception e) { System.err.println(e.toString() + " 2");}
 		try { registrationData = WebportalParser.registrationParser(SDSUWebportal.instance.registration(SDSUWebportal.instance.sessionID)); System.out.println("3 is done");} catch (Exception e) { System.err.println(e.toString() + " 3");}
 		try { messageData = WebportalParser.messageParser(SDSUWebportal.instance.messageCenter(SDSUWebportal.instance.sessionID)); System.out.println("4 is done");} catch (Exception e) { System.err.println(e.toString() + " 4");}
-		try {System.out.println(WebportalParser.calendarCleaner(SDSUWebportal.instance.getCalendar(SDSUWebportal.instance.sessionID)));} catch(Exception e){};
 
 		ArrayList<String> cleaned = new ArrayList<>();
 
@@ -86,17 +112,20 @@ public class DataManager extends AsyncTask<Void, Void, Boolean>{
 
 		for (int i = 1; i < cleaned.size() - 1 ; i+=2) {
 			AdmisionStatus.put(cleaned.get(i), cleaned.get(i+1));
+			admissions.add(new ListItem(cleaned.get(i), cleaned.get(i+1)));
 		}
 
-		for (int i = 0; i < registrationData.length-1; i++){
+		for (int i = 0; i < registrationData.length-1; i+=2){
 			RegisrationStatus.put(registrationData[i], registrationData[i+1]);
+			registrations.add(new ListItem(registrationData[i], registrationData[i+1]));
+			System.out.println(registrationData[i] + " " + registrationData[i+1]);
 		}
 
 
 		// LOL, Don't you just love hard coding XD
 		// Personally I hate it
 		for (int i = 0; i < messageData.length; i += 6) {
-			messages.add(new Message(messageData[i + 2], messageData[i + 3]));
+			messages.add(new ListItem(messageData[i + 2], messageData[i + 3]));
 		}
 
 
