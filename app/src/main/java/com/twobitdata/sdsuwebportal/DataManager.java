@@ -127,6 +127,8 @@ public class DataManager extends AsyncTask<Void, Void, Boolean>{
 		cleaned.remove("Status");
 		cleaned.remove("Status Details");
 		cleaned.remove("Test Scores:");
+		cleaned.remove("Freshmen Testing Requirements:");
+		cleaned.remove("Type");
 
 		for (int i = 1; i < cleaned.size() - 1 ; i+=2) {
 			AdmisionStatus.put(cleaned.get(i), cleaned.get(i+1));

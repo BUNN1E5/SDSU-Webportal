@@ -7,7 +7,7 @@
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.twobitdata.sdsuwebportal.MainActivity"
     android:padding="5dp"
-    android:background="#f1ebd5">
+    android:background="#dbdbdb">
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/item_view"
@@ -25,4 +25,5 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true" />
+
 </RelativeLayout>

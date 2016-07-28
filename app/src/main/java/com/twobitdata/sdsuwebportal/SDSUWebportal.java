@@ -41,8 +41,7 @@ public class SDSUWebportal {
 		con.setRequestProperty("Upgrade-Insecure-Requests", "1");
 		con.setRequestProperty("User-Agent",
 				"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36");
-		con.setRequestProperty("Referer",
-				"https://sunspot.sdsu.edu/AuthenticationService/loginVerifier.html?pc=portal");
+		con.setRequestProperty("Referer", "https://sunspot.sdsu.edu/AuthenticationService/loginVerifier.html?pc=portal");
 		con.setRequestProperty("Connection", "keep-alive");
 		con.setRequestProperty("Host", "sunspot.sdsu.edu");
 		con.setRequestProperty("Accept-Encoding", "gzip, deflate, br");
@@ -84,9 +83,10 @@ public class SDSUWebportal {
 			System.out.println(response.toString());
 			throw new Exception();
 		}
-		
+
 		sessionID = con.getURL().toString().substring(con.getURL().toString().indexOf("sess_id=") + 8, con.getURL().toString().length());
-		
+		System.out.println(cookieManager.getCookieStore().getCookies().get(3).toString().substring(8));
+
 		//System.out.println("sessionID URL: " + sessionID);
 		return true;
 	}
@@ -144,7 +144,7 @@ public class SDSUWebportal {
 		con.setRequestProperty("User-Agent",
 				"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36");
 		con.setRequestProperty("Referer",
-				"https://sunspot.sdsu.edu/pls/webapp/web_menu.main_page?sess_id=728593272|10312546");
+				"https://sunspot.sdsu.edu/pls/webapp/web_menu.main_page?sess_id=" + sessionId);
 		con.setRequestProperty("Connection", "keep-alive");
 		con.setRequestProperty("Host", "sunspot.sdsu.edu");
 		con.setRequestProperty("DNT", "1");
@@ -173,8 +173,8 @@ public class SDSUWebportal {
 		return response.toString();
 	}
 
-	public String messageCenter(String sessionId) throws Exception {
-		String url = "https://sunspot.sdsu.edu/pls/webapp/mc_msg_pkg.msg_list" + "?sess_id=" + sessionId + "&menu=2";
+	public String messageCenter(String sessionID) throws Exception {
+		String url = "https://sunspot.sdsu.edu/pls/webapp/mc_msg_pkg.msg_list" + "?sess_id=" + sessionID + "&menu=2";
 		URL obj = new URL(url);
 		HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 		
@@ -184,8 +184,7 @@ public class SDSUWebportal {
 		con.setRequestProperty("Upgrade-Insecure-Requests", "1");
 		con.setRequestProperty("User-Agent",
 				"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36");
-		con.setRequestProperty("Referer",
-				"https://sunspot.sdsu.edu/pls/webapp/web_menu.main?sess_id=" + sessionId + "&p_option=2");
+		con.setRequestProperty("Referer","https://sunspot.sdsu.edu/pls/webapp/web_menu.main?sess_id=" + sessionID + "&p_option=2");
 		con.setRequestProperty("Connection", "keep-alive");
 		con.setRequestProperty("Host", "sunspot.sdsu.edu");
 		con.setRequestProperty("DNT", "1");
@@ -226,7 +225,7 @@ public class SDSUWebportal {
 		con.setRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
 		con.setRequestProperty("Upgrade-Insecure-Requests", "1");
 		con.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36");
-		con.setRequestProperty("Referer", "https://sunspot.sdsu.edu/pls/webapp/web_menu.main_page?sess_id=845058276|10312546");
+		con.setRequestProperty("Referer", "https://sunspot.sdsu.edu/pls/webapp/web_menu.main_page?sess_id=" + sessionID);
 		con.setRequestProperty("Connection", "keep-alive");
 		con.setRequestProperty("Host", "sunspot.sdsu.edu");
 		con.setRequestProperty("DNT", "1");
