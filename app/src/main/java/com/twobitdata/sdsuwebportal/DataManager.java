@@ -15,7 +15,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-public class DataManager extends AsyncTask<Void, Void, Boolean>{
+public class DataManager{
 
 	public static Map<String, String> AdmisionStatus = new HashMap<String, String>();
 
@@ -57,100 +57,96 @@ public class DataManager extends AsyncTask<Void, Void, Boolean>{
 		}
 	}
 
-	public static boolean retrieveData(){
-		try {
-			DataManager manager = new DataManager();
-			manager.execute();
-			return manager.get();
-		} catch(Exception e) {
-			return false;
-		}
+
+	//AAAH THe Workarounds!
+	static String[] admissionData;
+	static String[] registrationData;
+	static String[] messageData;
+
+	public static void retrieveData(){
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				messages = new ArrayList<>();
+				admissions = new ArrayList<>();
+				registrations = new ArrayList<>();
+
+
+				//Convert to lower API level
+				try { admissionData = WebportalParser.admissionParser(SDSUWebportal.instance.admission(SDSUWebportal.instance.sessionID)); System.out.println("2 is done");} catch (Exception e) { System.err.println(e.toString() + " 2");}
+				try { registrationData = WebportalParser.registrationParser(SDSUWebportal.instance.registration(SDSUWebportal.instance.sessionID)); System.out.println("3 is done");} catch (Exception e) { System.err.println(e.toString() + " 3");}
+				try { messageData = WebportalParser.messageParser(SDSUWebportal.instance.messageCenter(SDSUWebportal.instance.sessionID)); System.out.println("4 is done");} catch (Exception e) { System.err.println(e.toString() + " 4");}
+
+				ArrayList<String> cleaned = new ArrayList<>();
+
+				if(admissionData != null) {
+					for (int i = 0; i < admissionData.length; i++) {
+						if (!admissionData[i].trim().isEmpty()) {
+							cleaned.add(admissionData[i]);
+							System.out.println(admissionData[i]);
+						}
+					}
+
+					// -_- Hard coding
+					cleaned.remove("Institution");
+					cleaned.remove("Dates");
+					cleaned.remove("Degree");
+					cleaned.remove("HIGH SCHOOL");
+					cleaned.remove("Type");
+					cleaned.remove("Total");
+					cleaned.remove("Date");
+					cleaned.remove("Status");
+					cleaned.remove("Status Details");
+					cleaned.remove("Status");
+					cleaned.remove("Status Details");
+					cleaned.remove("Status");
+					cleaned.remove("Status Details");
+					cleaned.remove("Test Scores:");
+					cleaned.remove("Freshmen Testing Requirements:");
+					cleaned.remove("Type");
+
+					for (int i = 1; i < cleaned.size() - 1; i += 2) {
+						AdmisionStatus.put(cleaned.get(i), cleaned.get(i + 1));
+						admissions.add(new ListItem(cleaned.get(i), cleaned.get(i + 1)));
+					}
+				}
+				if(registrationData != null) {
+					for (int i = 0; i < registrationData.length - 1; i += 2) {
+						RegisrationStatus.put(registrationData[i], registrationData[i + 1]);
+						registrations.add(new ListItem(registrationData[i], registrationData[i + 1]));
+						System.out.println(registrationData[i] + " " + registrationData[i + 1]);
+					}
+				}
+
+
+				// LOL, Don't you just love hard coding XD
+				// Personally I hate it
+				if(messageData != null) {
+					for (int i = 0; i < messageData.length; i += 6) {
+						messages.add(new ListItem(messageData[i + 2], messageData[i + 3]));
+					}
+				}
+
+				System.out.println("WE MADE IT!");
+			}
+		}).start();
 	}
 
 	//AAAHHHHH THE WORKAROUNDS
-	static Context context;
 	static String classes;
-	public static void cacheClasses(Context context){
-		context = DataManager.context;
+	public static void cacheClasses(){
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
 				try {
 					DataManager.classes = WebportalParser.calendarCleaner(SDSUWebportal.instance.getCalendar(SDSUWebportal.instance.sessionID));
+					System.out.println("Classes have been cached!");
 					//FileOutputStream stream = DataManager.context.openFileOutput("Classes.html", Context.MODE_PRIVATE);
 					//stream.write(DataManager.classes.getBytes());
 					//stream.close();
-				}catch(Exception e){System.err.println(e.toString());}
+				}catch(Exception e){System.err.println(e.toString() + " Data Manager!");}
 			}
 		}).start();
 
-	}
-
-	String[] admissionData;
-	String[] registrationData;
-	String[] messageData;
-
-
-	@Override
-	protected Boolean doInBackground(Void... params) {
-		messages = new ArrayList<>();
-		admissions = new ArrayList<>();
-		registrations = new ArrayList<>();
-
-
-		//Convert to lower API level
-		try { admissionData = WebportalParser.admissionParser(SDSUWebportal.instance.admission(SDSUWebportal.instance.sessionID)); System.out.println("2 is done");} catch (Exception e) { System.err.println(e.toString() + " 2");}
-		try { registrationData = WebportalParser.registrationParser(SDSUWebportal.instance.registration(SDSUWebportal.instance.sessionID)); System.out.println("3 is done");} catch (Exception e) { System.err.println(e.toString() + " 3");}
-		try { messageData = WebportalParser.messageParser(SDSUWebportal.instance.messageCenter(SDSUWebportal.instance.sessionID)); System.out.println("4 is done");} catch (Exception e) { System.err.println(e.toString() + " 4");}
-
-		ArrayList<String> cleaned = new ArrayList<>();
-
-		for (int i = 0; i < admissionData.length; i++) {
-			if(!admissionData[i].trim().isEmpty() ){
-				cleaned.add(admissionData[i]);
-				System.out.println(admissionData[i]);
-			}
-		}
-
-		// -_- Hard coding
-		cleaned.remove("Institution");
-		cleaned.remove("Dates");
-		cleaned.remove("Degree");
-		cleaned.remove("HIGH SCHOOL");
-		cleaned.remove("Type");
-		cleaned.remove("Total");
-		cleaned.remove("Date");
-		cleaned.remove("Status");
-		cleaned.remove("Status Details");
-		cleaned.remove("Status");
-		cleaned.remove("Status Details");
-		cleaned.remove("Status");
-		cleaned.remove("Status Details");
-		cleaned.remove("Test Scores:");
-		cleaned.remove("Freshmen Testing Requirements:");
-		cleaned.remove("Type");
-
-		for (int i = 1; i < cleaned.size() - 1 ; i+=2) {
-			AdmisionStatus.put(cleaned.get(i), cleaned.get(i+1));
-			admissions.add(new ListItem(cleaned.get(i), cleaned.get(i+1)));
-		}
-
-		for (int i = 0; i < registrationData.length-1; i+=2){
-			RegisrationStatus.put(registrationData[i], registrationData[i+1]);
-			registrations.add(new ListItem(registrationData[i], registrationData[i+1]));
-			System.out.println(registrationData[i] + " " + registrationData[i+1]);
-		}
-
-
-		// LOL, Don't you just love hard coding XD
-		// Personally I hate it
-		for (int i = 0; i < messageData.length; i += 6) {
-			messages.add(new ListItem(messageData[i + 2], messageData[i + 3]));
-		}
-
-
-
-		System.out.println("WE MADE IT!");
-		return true;
 	}
 }

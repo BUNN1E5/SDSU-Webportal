@@ -1,5 +1,6 @@
 package com.twobitdata.sdsuwebportal;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -22,6 +23,12 @@ import android.widget.TextView;
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
+import java.util.Scanner;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -47,7 +54,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setSupportActionBar(toolbar);
         PACKAGE_NAME = getApplicationContext().getPackageName();
         //Custom Code Start
-
         //DataManager.cacheClasses(this);
 
         setTitle("Admissions");
@@ -98,7 +104,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        //getMenuInflater().inflate(R.menu.main, menu);
+        getMenuInflater().inflate(R.menu.main, menu);
         name = (TextView) findViewById(R.id.student_name);
         name.setText(DataManager.AdmisionStatus.get("Name:"));
 
@@ -117,6 +123,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+
+            return true;
+        } else if(id == R.id.refresh){
+            DataManager.retrieveData();
+            DataManager.cacheClasses();
+            adapter.notifyDataSetChanged();
             return true;
         }
 
@@ -148,7 +160,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else if(id == R.id.Classes){
             webView.setVisibility(View.VISIBLE);
             webView.setInitialScale(150);
-            webView.loadDataWithBaseURL("file:///android_asset/", DataManager.classes, "text/html", "UTF-8", null);
+            webView.loadDataWithBaseURL("https://sunspot.sdsu.edu/schedule/mycalendar?category=my_calendar", DataManager.classes, "text/html", "UTF-8", null);
             setTitle("Classes");
         }else if(id == R.id.campus_map){
             webView.setVisibility(View.VISIBLE);
@@ -162,6 +174,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 protected Boolean doInBackground(Void... params) {
                     try{
                         SDSUWebportal.instance.logout(SDSUWebportal.instance.sessionID);
+
+                        FileOutputStream outputStream = openFileOutput(Login.fileName, Context.MODE_PRIVATE);
+                        PrintWriter writer = new PrintWriter(outputStream);
+                        writer.write("");
+                        outputStream.close();
                     } catch(Exception e){
                         System.out.println(e.toString());
                     }
