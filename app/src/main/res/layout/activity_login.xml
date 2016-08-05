@@ -82,7 +82,7 @@
             <CheckBox
                 android:layout_width="307dp"
                 android:layout_height="wrap_content"
-                android:text="Remember me"
+                android:text="Keep me signed in"
                 android:id="@+id/remember_me" />
 
             <Space

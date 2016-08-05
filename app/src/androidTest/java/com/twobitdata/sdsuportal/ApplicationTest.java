@@ -1,4 +1,4 @@
-package com.twobitdata.sdsuwebportal;
+package com.twobitdata.sdsuportal;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

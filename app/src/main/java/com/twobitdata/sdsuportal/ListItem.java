@@ -1,4 +1,4 @@
-package com.twobitdata.sdsuwebportal;
+package com.twobitdata.sdsuportal;
 
 public class ListItem{
 

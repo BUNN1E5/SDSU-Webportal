@@ -1,16 +1,12 @@
-package com.twobitdata.sdsuwebportal;
+package com.twobitdata.sdsuportal;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.CookieHandler;
 import java.net.CookieManager;
-import java.net.CookieStore;
-import java.net.HttpCookie;
 import java.net.HttpURLConnection;
 import java.io.InputStream;
-import java.util.List;
 import java.util.zip.GZIPInputStream;
 
 import java.net.URL;

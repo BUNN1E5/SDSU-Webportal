@@ -1,17 +1,10 @@
-package com.twobitdata.sdsuwebportal;
+package com.twobitdata.sdsuportal;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
-import android.util.Log;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -30,9 +23,13 @@ public class DataManager{
 	static List<ListItem> admissions; //With S for consistency
 	static List<ListItem> registrations;
 
+	public static boolean doneLoading = false;
+
 
 	public static boolean login(String username, String password) {
 		try {
+
+
 			DataManager.username = username;
 			DataManager.password = password;
 
@@ -67,6 +64,8 @@ public class DataManager{
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
+				doneLoading = false;
+
 				messages = new ArrayList<>();
 				admissions = new ArrayList<>();
 				registrations = new ArrayList<>();
@@ -128,6 +127,7 @@ public class DataManager{
 				}
 
 				System.out.println("WE MADE IT!");
+				doneLoading = true;
 			}
 		}).start();
 	}

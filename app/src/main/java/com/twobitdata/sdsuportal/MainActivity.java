@@ -1,10 +1,11 @@
-package com.twobitdata.sdsuwebportal;
+package com.twobitdata.sdsuportal;
 
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -17,27 +18,24 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.TextView;
 
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
-import java.util.Scanner;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private RecyclerView itemView;
+    private SwipeRefreshLayout swipeRefresh;
     private ItemAdapter adapter;
     TextView name;
     TextView studentId;
 
-    WebView webView;
+    WebView campusMap, classTimetable;
     String PACKAGE_NAME;
 
     /**
@@ -54,7 +52,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setSupportActionBar(toolbar);
         PACKAGE_NAME = getApplicationContext().getPackageName();
         //Custom Code Start
-        //DataManager.cacheClasses(this);
+        DataManager.cacheClasses();
 
         setTitle("Admissions");
 
@@ -78,17 +76,48 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         itemView.setLayoutManager(new LinearLayoutManager(this));
 
 
-        webView = (WebView)findViewById(R.id.campus_map);
-        webView.getSettings().setJavaScriptEnabled(true);
-        //webView.getSettings().setLoadWithOverviewMode(true);
-        //webView.getSettings().setUseWideViewPort(true);
-        webView.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
-        webView.setScrollbarFadingEnabled(true);
+        swipeRefresh = (SwipeRefreshLayout) findViewById(R.id.swipeRefresh);
+        swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                adapter.notifyDataSetChanged();
+                //swipeRefresh.setRefreshing(false);
 
-        webView.getSettings().setSupportZoom(true);
-        webView.getSettings().setBuiltInZoomControls(true);
-        webView.setHorizontalScrollBarEnabled(false);
-        webView.setVisibility(View.INVISIBLE);
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        while(!DataManager.doneLoading){
+
+                        }
+                        swipeRefresh.setRefreshing(false);
+                    }
+                }).start();
+            }
+        });
+
+
+        classTimetable = (WebView)findViewById(R.id.class_timetable);
+        classTimetable.getSettings().setJavaScriptEnabled(true);
+        classTimetable.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
+        classTimetable.setScrollbarFadingEnabled(true);
+        classTimetable.getSettings().setSupportZoom(true);
+        classTimetable.getSettings().setBuiltInZoomControls(true);
+        classTimetable.setHorizontalScrollBarEnabled(false);
+        classTimetable.setVisibility(View.INVISIBLE);
+        classTimetable.setInitialScale(150);
+        classTimetable.loadDataWithBaseURL("https://sunspot.sdsu.edu/schedule/mycalendar?category=my_calendar", DataManager.classes, "text/html", "UTF-8", null);
+
+        campusMap = (WebView)findViewById(R.id.campus_map);
+        campusMap.getSettings().setJavaScriptEnabled(true);
+        campusMap.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
+        campusMap.setScrollbarFadingEnabled(true);
+        campusMap.getSettings().setSupportZoom(true);
+        campusMap.getSettings().setBuiltInZoomControls(true);
+        campusMap.setHorizontalScrollBarEnabled(false);
+        campusMap.setVisibility(View.INVISIBLE);
+        campusMap.setInitialScale(100);
+        campusMap.loadUrl("file:///android_asset/sdsu_map.png");
+
     }
 
     @Override
@@ -105,6 +134,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
+
         name = (TextView) findViewById(R.id.student_name);
         name.setText(DataManager.AdmisionStatus.get("Name:"));
 
@@ -123,7 +153,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-
+            Intent settings = new Intent(this, SettingsActivity.class);
+            startActivity(settings);
             return true;
         } else if(id == R.id.refresh){
             DataManager.retrieveData();
@@ -143,29 +174,30 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int id = item.getItemId();
 
         if (id == R.id.admissions) {
-            webView.setVisibility(View.INVISIBLE);
+            classTimetable.setVisibility(View.INVISIBLE);
+            campusMap.setVisibility(View.INVISIBLE);
             adapter.setData(DataManager.admissions);
             adapter.notifyDataSetChanged();
             setTitle("Admissions");
         } else if (id == R.id.registration) {
-            webView.setVisibility(View.INVISIBLE);
+            classTimetable.setVisibility(View.INVISIBLE);
+            campusMap.setVisibility(View.INVISIBLE);
             adapter.setData(DataManager.registrations);
             adapter.notifyDataSetChanged();
             setTitle("Registration");
         } else if (id == R.id.messages) {
-            webView.setVisibility(View.INVISIBLE);
+            classTimetable.setVisibility(View.INVISIBLE);
+            campusMap.setVisibility(View.INVISIBLE);
             adapter.setData(DataManager.messages);
             adapter.notifyDataSetChanged();
             setTitle("Messages");
         } else if(id == R.id.Classes){
-            webView.setVisibility(View.VISIBLE);
-            webView.setInitialScale(150);
-            webView.loadDataWithBaseURL("https://sunspot.sdsu.edu/schedule/mycalendar?category=my_calendar", DataManager.classes, "text/html", "UTF-8", null);
-            setTitle("Classes");
+            campusMap.setVisibility(View.INVISIBLE);
+            classTimetable.setVisibility(View.VISIBLE);
+            setTitle("Class Timetable");
         }else if(id == R.id.campus_map){
-            webView.setVisibility(View.VISIBLE);
-            webView.setInitialScale(100);
-            webView.loadUrl("file:///android_asset/sdsu_map.png");
+            campusMap.setVisibility(View.VISIBLE);
+            classTimetable.setVisibility(View.INVISIBLE);
             setTitle("Campus Map");
         }
         else if(id == R.id.logout){
@@ -179,6 +211,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         PrintWriter writer = new PrintWriter(outputStream);
                         writer.write("");
                         outputStream.close();
+
+                        Intent loginActivity = new Intent(MainActivity.this, Login.class);
+                        loginActivity.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(loginActivity);
                     } catch(Exception e){
                         System.out.println(e.toString());
                     }
@@ -187,9 +223,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             };
             logout.execute();
 
-            Intent loginActivity = new Intent(this, Login.class);
-            loginActivity.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(loginActivity);
+
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
