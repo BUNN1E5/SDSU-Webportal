@@ -1,4 +1,4 @@
-package com.twobitdata.sdsuportal;
+package com.twobitdata.sdsuportalunffl;
 
 import java.util.ArrayList;
 
@@ -107,17 +107,37 @@ public class WebportalParser {
 				returnData.add(mainInfo[i]);
 			}
 		}
-
-		for(int i = 0; i < returnData.size(); i++){
-			System.out.println(returnData.get(i));
-		}
-
 		return returnData.toArray(new String[returnData.size()]);
 	}
 
 	public static String calendarCleaner(String data){
 		String cleaned = data.substring(0, data.indexOf("</style>") + "</style>".length()) + data.substring(data.indexOf("<div id=\"calendarTitles\">"), data.indexOf("<div id=\"footer\">"));
 		return cleaned;
+	}
+
+	//This is so we know what data to parse
+	private static int widthPercentages[] = {10, 18, 7};
+
+	public static String[] gradesParser(String data){
+		int subStringStart = data.indexOf("<table width=\"69%\" border=\"0\">");
+		int subStringEnd = data.indexOf("</table>", subStringStart);
+
+		String trimmed = data.substring(subStringStart, subStringEnd);
+		String[] classes = trimmed.split("<td");
+
+		//ArrayList cause I was lazy
+		ArrayList<String> returnData = new ArrayList<>();
+
+		for(int i = 0; i < classes.length; i++) {
+			for (int j = 0; j < widthPercentages.length; j++){
+				if (classes[i].contains("width=\"" + widthPercentages[j] + "%\"")) {
+					subStringStart = classes[i].indexOf("\">") + 2;
+					subStringEnd = classes[i].indexOf("</td");
+					returnData.add(classes[i].substring(subStringStart, subStringEnd));
+				}
+			}
+		}
+		return returnData.toArray(new String[returnData.size()]);
 	}
 	
 }

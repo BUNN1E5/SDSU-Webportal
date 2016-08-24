@@ -1,4 +1,4 @@
-package com.twobitdata.sdsuportal;
+package com.twobitdata.sdsuportalunffl;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -246,7 +246,7 @@ public class SDSUWebportal {
 		}
 
 		in.close();
-		System.out.println(response.toString());
+		//System.out.println(response.toString());
 		return response.toString();
 	}
 
@@ -285,6 +285,34 @@ public class SDSUWebportal {
 
 		in.close();
 		//System.out.println(response.toString());
+		return response.toString();
+	}
+	public String grades (String sessionID) throws Exception
+	{
+		String url = "https://sunspot.sdsu.edu/pls/webapp/gradeline.stugrades?sess_id=" + sessionID + "&menu=U";
+		URL obj = new URL(url);
+		HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+
+		con.setRequestMethod("GET");
+		con.setRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
+		con.setRequestProperty("Upgrade-Insecure-Requests", "1");
+		con.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36");
+		con.setRequestProperty("Connection", "keep-alive");
+		con.setRequestProperty("Host", "sunspot.sdsu.edu");
+		con.setRequestProperty("DNT", "1");
+		con.setRequestProperty("Accept-Encoding", "gzip, deflate, sdch, br");
+		con.setRequestProperty("Accept-Language", "en-US,en;q=0.8");
+
+		int responseCode = con.getResponseCode();
+		InputStream input = con.getInputStream();
+		if ("gzip".equals(con.getContentEncoding())) {
+			input = new GZIPInputStream(input);
+		}
+		BufferedReader in = new BufferedReader(new InputStreamReader(input));
+		String inputLine;
+		StringBuffer response = new StringBuffer();
+		while ((inputLine = in.readLine()) != null) {	response.append(inputLine);}
+		in.close();
 		return response.toString();
 	}
 }

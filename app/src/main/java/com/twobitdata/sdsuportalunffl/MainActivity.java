@@ -1,4 +1,4 @@
-package com.twobitdata.sdsuportal;
+package com.twobitdata.sdsuportalunffl;
 
 import android.content.Context;
 import android.content.Intent;
@@ -31,7 +31,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private RecyclerView itemView;
     private SwipeRefreshLayout swipeRefresh;
-    private ItemAdapter adapter;
+    private ItemAdapter itemAdapter;
+    private GradeAdapter gradeAdapter; // This was implemented stupidly :P
     TextView name;
     TextView studentId;
 
@@ -71,27 +72,41 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
         itemView = (RecyclerView)findViewById(R.id.item_view);
-        adapter = new ItemAdapter(this, DataManager.admissions);
-        itemView.setAdapter(adapter);
         itemView.setLayoutManager(new LinearLayoutManager(this));
 
+        itemAdapter = new ItemAdapter(this, DataManager.admissions);
+        itemAdapter.notifyDataSetChanged();
+
+        itemView.setAdapter(itemAdapter);
+
+        gradeAdapter = new GradeAdapter(this, DataManager.grades);
+        gradeAdapter.notifyDataSetChanged();
 
         swipeRefresh = (SwipeRefreshLayout) findViewById(R.id.swipeRefresh);
         swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                adapter.notifyDataSetChanged();
+                itemAdapter.notifyDataSetChanged();
                 //swipeRefresh.setRefreshing(false);
 
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        while(!DataManager.doneLoading){
-
-                        }
-                        swipeRefresh.setRefreshing(false);
+                        DataManager.doneLoading = false;
+                        DataManager.retrieveData();
+                        DataManager.cacheClasses();
+                        itemAdapter.notifyDataSetChanged();
+                        while(!DataManager.doneLoading){}
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                swipeRefresh.setRefreshing(false);
+                            }
+                        });
                     }
                 }).start();
+
+
             }
         });
 
@@ -99,9 +114,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         classTimetable = (WebView)findViewById(R.id.class_timetable);
         classTimetable.getSettings().setJavaScriptEnabled(true);
         classTimetable.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
-        classTimetable.setScrollbarFadingEnabled(true);
-        classTimetable.getSettings().setSupportZoom(true);
-        classTimetable.getSettings().setBuiltInZoomControls(true);
+        classTimetable.setScrollbarFadingEnabled(false);
+        classTimetable.getSettings().setSupportZoom(false);
+        classTimetable.getSettings().setBuiltInZoomControls(false);
         classTimetable.setHorizontalScrollBarEnabled(false);
         classTimetable.setVisibility(View.INVISIBLE);
         classTimetable.setInitialScale(150);
@@ -159,7 +174,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else if(id == R.id.refresh){
             DataManager.retrieveData();
             DataManager.cacheClasses();
-            adapter.notifyDataSetChanged();
+            itemAdapter.notifyDataSetChanged();
             return true;
         }
 
@@ -174,28 +189,42 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int id = item.getItemId();
 
         if (id == R.id.admissions) {
+            itemView.setVisibility(View.VISIBLE);
+            setAdapter(0);
             classTimetable.setVisibility(View.INVISIBLE);
             campusMap.setVisibility(View.INVISIBLE);
-            adapter.setData(DataManager.admissions);
-            adapter.notifyDataSetChanged();
+            itemAdapter.setData(DataManager.admissions);
+            itemAdapter.notifyDataSetChanged();
             setTitle("Admissions");
         } else if (id == R.id.registration) {
+            itemView.setVisibility(View.VISIBLE);
+            setAdapter(0);
             classTimetable.setVisibility(View.INVISIBLE);
             campusMap.setVisibility(View.INVISIBLE);
-            adapter.setData(DataManager.registrations);
-            adapter.notifyDataSetChanged();
+            itemAdapter.setData(DataManager.registrations);
+            itemAdapter.notifyDataSetChanged();
             setTitle("Registration");
-        } else if (id == R.id.messages) {
+        } else if(id == R.id.grades){
+            itemView.setVisibility(View.VISIBLE);
+            setAdapter(1);
             classTimetable.setVisibility(View.INVISIBLE);
             campusMap.setVisibility(View.INVISIBLE);
-            adapter.setData(DataManager.messages);
-            adapter.notifyDataSetChanged();
+            setTitle("Grades");
+        } else if (id == R.id.messages) {
+            setAdapter(0);
+            itemView.setVisibility(View.VISIBLE);
+            classTimetable.setVisibility(View.INVISIBLE);
+            campusMap.setVisibility(View.INVISIBLE);
+            itemAdapter.setData(DataManager.messages);
+            itemAdapter.notifyDataSetChanged();
             setTitle("Messages");
-        } else if(id == R.id.Classes){
+        } else if(id == R.id.classes){
+            itemView.setVisibility(View.INVISIBLE);
             campusMap.setVisibility(View.INVISIBLE);
             classTimetable.setVisibility(View.VISIBLE);
             setTitle("Class Timetable");
         }else if(id == R.id.campus_map){
+            itemView.setVisibility(View.INVISIBLE);
             campusMap.setVisibility(View.VISIBLE);
             classTimetable.setVisibility(View.INVISIBLE);
             setTitle("Campus Map");
@@ -231,6 +260,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
+    //Runs the nessisary code in order to make sure all the UI is using the correct
+    //itemAdapter and data.
+    // 0 is ListItem, 1 is GradeItem
+    public void setAdapter(int type){
+        if(type == 1){
+            itemView.setAdapter(gradeAdapter);
+            gradeAdapter.notifyDataSetChanged();
+        } else {
+            itemView.setAdapter(itemAdapter);
+            itemAdapter.notifyDataSetChanged();
+        }
+    }
+
     @Override
     public void onStart() {
         super.onStart();
@@ -246,7 +288,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 // Otherwise, set the URL to null.
                 Uri.parse("http://host/path"),
                 // TODO: Make sure this auto-generated app URL is correct.
-                Uri.parse("android-app://com.twobitdata.sdsuwebportal/http/host/path")
+                Uri.parse("android-app://com.twobitdata.sdsuportalunffl/http/host/path")
         );
         AppIndex.AppIndexApi.start(client, viewAction);
     }
@@ -254,6 +296,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public void onStop() {
         super.onStop();
+
+        try{
+            SDSUWebportal.instance.logout(SDSUWebportal.instance.sessionID);
+        }catch(Exception e){}
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -265,7 +311,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 // Otherwise, set the URL to null.
                 Uri.parse("http://host/path"),
                 // TODO: Make sure this auto-generated app URL is correct.
-                Uri.parse("android-app://com.twobitdata.sdsuwebportal/http/host/path")
+                Uri.parse("android-app://com.twobitdata.sdsuportalunffl/http/host/path")
         );
         AppIndex.AppIndexApi.end(client, viewAction);
         client.disconnect();

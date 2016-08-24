@@ -11,7 +11,12 @@
             android:icon="@drawable/registration"
             android:title="Registration" />
         <item
-            android:id="@+id/Classes"
+            android:id="@+id/grades"
+            android:icon="@drawable/classes"
+            android:title="Grades"
+            />
+        <item
+            android:id="@+id/classes"
             android:icon="@drawable/classes"
             android:title="Class Timetable"
             />

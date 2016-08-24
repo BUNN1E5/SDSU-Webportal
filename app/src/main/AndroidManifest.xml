@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.twobitdata.sdsuportal">
+    package="com.twobitdata.sdsuportalunffl">
 
     <!-- To auto-complete the email text field in the login form with the user's emails -->
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
@@ -17,7 +17,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
         <activity
-            android:name="com.twobitdata.sdsuportal.Login"
+            android:name="com.twobitdata.sdsuportalunffl.Login"
             android:label="@string/app_name"
             android:screenOrientation="portrait">
             <intent-filter>
@@ -27,7 +27,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.twobitdata.sdsuportal.MainActivity"
+            android:name="com.twobitdata.sdsuportalunffl.MainActivity"
             android:label="@string/title_activity_main"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
@@ -40,7 +40,7 @@
             android:value="@integer/google_play_services_version" />
 
         <activity
-            android:name="com.twobitdata.sdsuportal.SettingsActivity"
+            android:name="com.twobitdata.sdsuportalunffl.SettingsActivity"
             android:label="@string/title_activity_settings" />
     </application>
 

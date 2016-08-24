@@ -1,4 +1,4 @@
-package com.twobitdata.sdsuportal;
+package com.twobitdata.sdsuportalunffl;
 
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -22,6 +22,7 @@ public class DataManager{
 	static List<ListItem> messages;
 	static List<ListItem> admissions; //With S for consistency
 	static List<ListItem> registrations;
+	static List<GradeItem> grades; // <- So much for polymorphism
 
 	public static boolean doneLoading = false;
 
@@ -59,22 +60,25 @@ public class DataManager{
 	static String[] admissionData;
 	static String[] registrationData;
 	static String[] messageData;
+	static String[] gradeData;
 
 	public static void retrieveData(){
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
+				//So we don't relead everything more than once
 				doneLoading = false;
 
 				messages = new ArrayList<>();
 				admissions = new ArrayList<>();
 				registrations = new ArrayList<>();
-
+				grades = new ArrayList<>();
 
 				//Convert to lower API level
 				try { admissionData = WebportalParser.admissionParser(SDSUWebportal.instance.admission(SDSUWebportal.instance.sessionID)); System.out.println("2 is done");} catch (Exception e) { System.err.println(e.toString() + " 2");}
 				try { registrationData = WebportalParser.registrationParser(SDSUWebportal.instance.registration(SDSUWebportal.instance.sessionID)); System.out.println("3 is done");} catch (Exception e) { System.err.println(e.toString() + " 3");}
 				try { messageData = WebportalParser.messageParser(SDSUWebportal.instance.messageCenter(SDSUWebportal.instance.sessionID)); System.out.println("4 is done");} catch (Exception e) { System.err.println(e.toString() + " 4");}
+				try { gradeData = WebportalParser.gradesParser(SDSUWebportal.instance.grades(SDSUWebportal.instance.sessionID)); System.out.println("5 is done");} catch (Exception e) { System.err.println(e.toString() + " 5");}
 
 				ArrayList<String> cleaned = new ArrayList<>();
 
@@ -82,7 +86,7 @@ public class DataManager{
 					for (int i = 0; i < admissionData.length; i++) {
 						if (!admissionData[i].trim().isEmpty()) {
 							cleaned.add(admissionData[i]);
-							System.out.println(admissionData[i]);
+							//System.out.println(admissionData[i]);
 						}
 					}
 
@@ -113,7 +117,7 @@ public class DataManager{
 					for (int i = 0; i < registrationData.length - 1; i += 2) {
 						RegisrationStatus.put(registrationData[i], registrationData[i + 1]);
 						registrations.add(new ListItem(registrationData[i], registrationData[i + 1]));
-						System.out.println(registrationData[i] + " " + registrationData[i + 1]);
+						//System.out.println(registrationData[i] + " " + registrationData[i + 1]);
 					}
 				}
 
@@ -123,6 +127,13 @@ public class DataManager{
 				if(messageData != null) {
 					for (int i = 0; i < messageData.length; i += 6) {
 						messages.add(new ListItem(messageData[i + 2], messageData[i + 3]));
+					}
+				}
+
+				if(gradeData != null){
+					for(int i = 4 ; i < gradeData.length -1 ; i+=3){
+						GradeItem item = new GradeItem(gradeData[i], gradeData[i+1], gradeData[i+2]);
+						grades.add(item);
 					}
 				}
 
