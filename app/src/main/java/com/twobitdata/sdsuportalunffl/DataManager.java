@@ -145,6 +145,7 @@ public class DataManager{
 
 	//AAAHHHHH THE WORKAROUNDS
 	static String classes;
+	static boolean doneClasses = false;
 	public static void cacheClasses(){
 		new Thread(new Runnable() {
 			@Override
@@ -152,6 +153,7 @@ public class DataManager{
 				try {
 					DataManager.classes = WebportalParser.calendarCleaner(SDSUWebportal.instance.getCalendar(SDSUWebportal.instance.sessionID));
 					System.out.println("Classes have been cached!");
+					doneClasses = true;
 					//FileOutputStream stream = DataManager.context.openFileOutput("Classes.html", Context.MODE_PRIVATE);
 					//stream.write(DataManager.classes.getBytes());
 					//stream.close();

@@ -120,7 +120,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         classTimetable.setHorizontalScrollBarEnabled(false);
         classTimetable.setVisibility(View.INVISIBLE);
         classTimetable.setInitialScale(150);
-        classTimetable.loadDataWithBaseURL("https://sunspot.sdsu.edu/schedule/mycalendar?category=my_calendar", DataManager.classes, "text/html", "UTF-8", null);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while(DataManager.doneClasses){}
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        classTimetable.loadDataWithBaseURL("https://sunspot.sdsu.edu/schedule/mycalendar?category=my_calendar", DataManager.classes, "text/html", "UTF-8", null);
+                    }
+                });
+            }
+        }).start();
+
+
+        System.out.println("Checking timetable " + DataManager.classes);
+
 
         campusMap = (WebView)findViewById(R.id.campus_map);
         campusMap.getSettings().setJavaScriptEnabled(true);
