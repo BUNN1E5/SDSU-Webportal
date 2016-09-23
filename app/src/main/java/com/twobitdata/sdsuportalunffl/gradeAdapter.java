@@ -11,32 +11,38 @@ import java.util.Collections;
 import java.util.List;
 
 
-public class gradeAdapter extends RecyclerView.Adapter<gradeAdapter.ItemViewHolder> {
+public class GradeAdapter extends RecyclerView.Adapter<GradeAdapter.GradeViewHolder> {
 
     private LayoutInflater inflater;
-    List<ListItem> data = Collections.emptyList();
+    List<GradeItem> data = Collections.emptyList();
 
-    public gradeAdapter(Context context, List<ListItem> data){
+    public GradeAdapter(Context context, List<GradeItem> data){
+
+        for (int i = 0; i < data.size(); i++){
+            System.out.println(data.get(i).toString());
+        }
+
         inflater = LayoutInflater.from(context);
         this.data = data;
     }
 
-    public void setData( List<ListItem> data){
+    public void setData( List<GradeItem> data){
         this.data = data;
     }
     
     @Override
-    public ItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = inflater.inflate(R.layout.list_item, parent, false);
-        ItemViewHolder holder = new ItemViewHolder(view);
+    public GradeViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view = inflater.inflate(R.layout.grade_item, parent, false);
+        GradeViewHolder holder = new GradeViewHolder(view);
         return holder;
     }
 
     @Override
-    public void onBindViewHolder(ItemViewHolder holder, int position) {
-        ListItem item = data.get(position);
-        holder.mainText.setText(item.mainText);
-        holder.subText.setText(item.subText);
+    public void onBindViewHolder(GradeViewHolder holder, int position) {
+        GradeItem item = data.get(position);
+        holder.courseName.setText(item.courseName);
+        holder.teacherName.setText(item.teacherName);
+        holder.grade.setText(item.grade);
     }
 
     @Override
@@ -44,15 +50,16 @@ public class gradeAdapter extends RecyclerView.Adapter<gradeAdapter.ItemViewHold
         return data.size();
     }
     
-    class ItemViewHolder extends RecyclerView.ViewHolder{
+    class GradeViewHolder extends RecyclerView.ViewHolder{
 
-        TextView mainText, subText;
+        TextView courseName, teacherName, grade;
 
 
-        public ItemViewHolder(View itemView) {
+        public GradeViewHolder(View itemView) {
             super(itemView);
-            mainText = (TextView) itemView.findViewById(R.id.main_text);
-            subText = (TextView) itemView.findViewById(R.id.sub_text);
+            courseName = (TextView) itemView.findViewById(R.id.course_name);
+            teacherName = (TextView) itemView.findViewById(R.id.teacher_name);
+            grade = (TextView) itemView.findViewById(R.id.grade);
 
         }
     }

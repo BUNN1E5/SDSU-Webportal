@@ -36,6 +36,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     TextView name;
     TextView studentId;
 
+    public Thread refresh;
+
     WebView campusMap, classTimetable;
     String PACKAGE_NAME;
 
@@ -82,35 +84,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         gradeAdapter = new GradeAdapter(this, DataManager.grades);
         gradeAdapter.notifyDataSetChanged();
 
-        swipeRefresh = (SwipeRefreshLayout) findViewById(R.id.swipeRefresh);
-        swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                itemAdapter.notifyDataSetChanged();
-                //swipeRefresh.setRefreshing(false);
-
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        DataManager.doneLoading = false;
-                        DataManager.retrieveData();
-                        DataManager.cacheClasses();
-                        itemAdapter.notifyDataSetChanged();
-                        while(!DataManager.doneLoading){}
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                swipeRefresh.setRefreshing(false);
-                            }
-                        });
-                    }
-                }).start();
-
-
-            }
-        });
-
-
         classTimetable = (WebView)findViewById(R.id.class_timetable);
         classTimetable.getSettings().setJavaScriptEnabled(true);
         classTimetable.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
@@ -120,21 +93,40 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         classTimetable.setHorizontalScrollBarEnabled(false);
         classTimetable.setVisibility(View.INVISIBLE);
         classTimetable.setInitialScale(150);
-        new Thread(new Runnable() {
+
+        swipeRefresh = (SwipeRefreshLayout) findViewById(R.id.swipeRefresh);
+
+        refresh = new Thread(new Runnable() {
             @Override
             public void run() {
-                while(DataManager.doneClasses){}
+                DataManager.doneLoading = false;
+                DataManager.retrieveData();
+                DataManager.cacheClasses();
+                itemAdapter.notifyDataSetChanged();
+                while(!DataManager.doneLoading && !DataManager.doneClasses){}
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         classTimetable.loadDataWithBaseURL("https://sunspot.sdsu.edu/schedule/mycalendar?category=my_calendar", DataManager.classes, "text/html", "UTF-8", null);
+                        swipeRefresh.setRefreshing(false);
                     }
                 });
             }
-        }).start();
+        });
+
+        swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                itemAdapter.notifyDataSetChanged();
+                //swipeRefresh.setRefreshing(false);
+
+                refresh.start();
 
 
-        System.out.println("Checking timetable " + DataManager.classes);
+            }
+        });
+
+
 
 
         campusMap = (WebView)findViewById(R.id.campus_map);
@@ -148,6 +140,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         campusMap.setInitialScale(100);
         campusMap.loadUrl("file:///android_asset/sdsu_map.png");
 
+        itemView.setVisibility(View.VISIBLE);
+        setAdapter(0);
+        classTimetable.setVisibility(View.INVISIBLE);
+        campusMap.setVisibility(View.INVISIBLE);
+        itemAdapter.setData(DataManager.admissions);
+        itemAdapter.notifyDataSetChanged();
+
+        refresh.start();
     }
 
     @Override
@@ -190,6 +190,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             DataManager.retrieveData();
             DataManager.cacheClasses();
             itemAdapter.notifyDataSetChanged();
+            refresh.start();
             return true;
         }
 
