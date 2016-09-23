@@ -191,6 +191,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             DataManager.cacheClasses();
             itemAdapter.notifyDataSetChanged();
             refresh.start();
+            //Random comment
             return true;
         }
 
