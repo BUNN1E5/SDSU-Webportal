@@ -96,33 +96,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         swipeRefresh = (SwipeRefreshLayout) findViewById(R.id.swipeRefresh);
 
-        refresh = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                DataManager.doneLoading = false;
-                DataManager.retrieveData();
-                DataManager.cacheClasses();
-                itemAdapter.notifyDataSetChanged();
-                while(!DataManager.doneLoading && !DataManager.doneClasses){}
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        classTimetable.loadDataWithBaseURL("https://sunspot.sdsu.edu/schedule/mycalendar?category=my_calendar", DataManager.classes, "text/html", "UTF-8", null);
-                        swipeRefresh.setRefreshing(false);
-                    }
-                });
-            }
-        });
-
         swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
                 itemAdapter.notifyDataSetChanged();
                 //swipeRefresh.setRefreshing(false);
-
-                refresh.start();
-
-
+                refresh();
             }
         });
 
@@ -147,7 +126,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         itemAdapter.setData(DataManager.admissions);
         itemAdapter.notifyDataSetChanged();
 
-        refresh.start();
+        refresh();
     }
 
     @Override
@@ -190,7 +169,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             DataManager.retrieveData();
             DataManager.cacheClasses();
             itemAdapter.notifyDataSetChanged();
-            refresh.start();
+            refresh();
             //Random comment
             return true;
         }
@@ -332,5 +311,30 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         );
         AppIndex.AppIndexApi.end(client, viewAction);
         client.disconnect();
+    }
+
+    public void refresh(){
+        try {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    DataManager.doneLoading = false;
+                    DataManager.retrieveData();
+                    DataManager.cacheClasses();
+                    itemAdapter.notifyDataSetChanged();
+                    while (!DataManager.doneLoading && !DataManager.doneClasses) {
+                    }
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            classTimetable.loadDataWithBaseURL("https://sunspot.sdsu.edu/schedule/mycalendar?category=my_calendar", DataManager.classes, "text/html", "UTF-8", null);
+                            swipeRefresh.setRefreshing(false);
+                        }
+                    });
+                }
+            }).start();
+        } catch(Exception meBeingLazy){
+            System.out.println("something bad happened" + meBeingLazy.toString());
+        }
     }
 }
